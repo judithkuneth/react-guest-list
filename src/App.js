@@ -64,6 +64,7 @@ function App() {
   }
   return (
     <>
+      <h1>Lama's Guest List</h1>,
       <GuestList
         guests={guests}
         checkGuests={checkGuests}
@@ -75,9 +76,9 @@ function App() {
       <button onClick={clearGuests}>Delete Selected </button>
       <div>{guests.length} Guests in total</div>
       <div>
-        <h1> Hello there</h1>
+        <h1> See you at my Party!</h1>
         <img src={Lama} alt=""></img>
-        <h1>Today is a gooood day!.</h1>
+        <h1>It's gonna be gooooooood!.</h1>
       </div>
     </>
   );
