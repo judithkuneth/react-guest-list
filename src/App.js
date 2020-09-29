@@ -1,87 +1,184 @@
-import React, { useState, useRef, useEffect } from 'react';
-import Lama from './images/lama.jpg';
-import GuestList from './GuestList.js';
-import { v4 as uuidv4 } from 'uuid';
-uuidv4();
+import React, { useState, useEffect } from 'react';
 
-// const localStorageKey = 'guestApp.guests';
+export default function App2() {
+  const baseUrl = 'https://jk-guest-list.herokuapp.com/';
 
-function App() {
-  const [guests, setGuests] = useState([]);
-  const firstNameRef = useRef();
-  const lastNameRef = useRef();
+  // const [guests, setGuests] = useState([]);
+
+  let [firstName, setFirstName] = useState();
+  let [lastName, setLastName] = useState();
+  // let [attending, setAttending] = useState();
+
+  let [guestList, setGuestList] = useState([]);
 
   const localStorageKey = 'guestApp.guests';
 
   useEffect(() => {
     const storedGuests = JSON.parse(localStorage.getItem(localStorageKey));
-    if (storedGuests) setGuests(storedGuests);
+    if (storedGuests) setGuestList(storedGuests);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(localStorageKey, JSON.stringify(guests));
-  }, [guests]);
+    localStorage.setItem(localStorageKey, JSON.stringify(guestList));
+  }, [guestList]);
 
-  function checkGuests(id) {
-    const newGuests = [...guests];
-    const guest = newGuests.find((guest) => guest.id === id);
-    guest.attending = !guest.attending;
-    setGuests(newGuests);
+  async function getGuestList() {
+    const response = await fetch(`${baseUrl}/`);
+    const allGuests = await response.json();
+    setGuestList(allGuests);
   }
 
-  function selectGuests(id) {
-    const newGuests = [...guests];
-    const guest = newGuests.find((guest) => guest.id === id);
-    guest.selected = !guest.selected;
-    setGuests(newGuests);
-  }
+  // let checkboxStatus = '';
 
-  function addGuest(e) {
-    const firstName = firstNameRef.current.value;
-    if (firstName === '') return;
-    setGuests((previousGuests) => {
-      return [
-        ...previousGuests,
-        {
-          id: uuidv4(),
-          firstName: firstName,
-          lastName: lastName,
-          attending: false,
-          selected: false,
-        },
-      ];
+  // function checkAttendance() {
+  //   const status = guestList.map((guest) => guest.attending);
+  //   console.log(status);
+  //   if (status === true) return (checkboxStatus = 'attending');
+  //   else return (checkboxStatus = 'not attending');
+  // }
+  // checkAttendance();
+
+  function mapGetGuestList() {
+    return guestList.map((guest) => {
+      console.log(guest.attending);
+      return (
+        <div key={guest.id}>
+          <input
+            type="checkbox"
+            value={guest.id}
+            onChange={() => updateGuest(guest)}
+          ></input>
+          {guest.id}
+          {guest.firstName}
+          {guest.lastName}
+          <input
+            type="checkbox"
+            value={guest.id}
+            onChange={() => deleteGuest(guest)}
+          ></input>
+        </div>
+      );
     });
-    firstNameRef.current.value = null;
-    const lastName = lastNameRef.current.value;
-    if (lastName === '') return;
-    console.log(lastName);
-    lastNameRef.current.value = null;
   }
 
-  function clearGuests() {
-    const newGuests = guests.filter((guest) => !guest.selected);
-    setGuests(newGuests);
+  // function addGuest() {
+  //   const timestamp = new Date().valueOf();
+  //   return setGuests((previousGuests) => {
+  //     return [
+  //       ...previousGuests,
+  //       {
+  //         id: timestamp,
+  //         attending: false,
+  //         firstname: firstName,
+  //         lastname: lastName,
+  //         selected: false,
+  //       },
+  //     ];
+  //   });
+  // }
+
+  async function addNewGuest() {
+    const response = await fetch(`${baseUrl}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        firstName: `${firstName}`,
+        lastName: `${lastName}`,
+      }),
+    });
+    const createdGuest = await response.json();
+    console.log(createdGuest);
+    getGuestList();
   }
+
+  async function updateGuest(guest) {
+    const response = await fetch(`${baseUrl}/${guest.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ attending: !guest.attending }),
+    });
+    const updatedGuest = await response.json();
+    console.log(updatedGuest);
+    getGuestList();
+  }
+
+  async function deleteGuest(guest) {
+    const response = await fetch(`${baseUrl}/${guest.id}`, {
+      method: 'DELETE',
+    });
+    const deletedGuest = await response.json();
+    console.log(deletedGuest);
+    getGuestList();
+  }
+
+  // function changeAttendance(id) {
+  //   const newGuests = [...guests];
+  //   const guest = newGuests.find((a) => a.id === id);
+  //   guest.attending = !guest.attending;
+  //   setGuests(newGuests);
+  //   console.log(id);
+  // }
+
+  // function selectDeselect(id) {
+  //   const newGuests = [...guests];
+  //   const guest = newGuests.find((a) => a.id === id);
+  //   guest.selected = !guest.selected;
+  //   setGuests(newGuests);
+  // }
+
+  // function removeSelected() {
+  //   const newGuests = [...guests];
+  //   const unSelectedGuests = newGuests.filter((guest) => !guest.selected);
+  //   setGuests(unSelectedGuests);
+  // }
+
+  // function showGuestList() {
+  //   return guests.map((guest) => {
+  //     return (
+  //       <div key={guest.id}>
+  //         <input
+  //           type="checkbox"
+  //           onChange={() => changeAttendance(guest.id)}
+  //           checked={guest.attending}
+  //         ></input>
+  //         {guest.firstname} {guest.lastname}
+  //         <input
+  //           type="checkbox"
+  //           onChange={() => selectDeselect(guest.id)}
+  //           checked={guest.selected}
+  //         ></input>
+  //       </div>
+  //     );
+  //   });
+  // }
+
   return (
     <>
-      <h1>Lama's Guest List</h1>,
-      <GuestList
-        guests={guests}
-        checkGuests={checkGuests}
-        selectGuests={selectGuests}
-      />
-      <input ref={firstNameRef} type="Text"></input>
-      <input ref={lastNameRef} type="Text"></input>
-      <button onClick={addGuest}>Add Guest</button>
-      <button onClick={clearGuests}>Delete Selected </button>
-      <div>{guests.length} Guests in total</div>
-      <div>
-        <h1> See you at my Party!</h1>
-        <img src={Lama} alt=""></img>
-        <h1>It's gonna be gooooooood!.</h1>
-      </div>
+      <button onClick={getGuestList}>Get Guestlist</button>
+      <h1>Guests coming:</h1>
+      {/* {showGuestList()} */}
+      {mapGetGuestList()}
+      <input
+        id="firstname"
+        onChange={(e) => {
+          setFirstName(e.currentTarget.value);
+        }}
+        placeholder="name"
+      ></input>
+      <input
+        id="secondname"
+        placeholder="lastname"
+        onChange={(e) => {
+          setLastName(e.currentTarget.value);
+        }}
+      ></input>
+      {/* <button onClick={addGuest}>Add</button>
+      <button onClick={removeSelected}>Remove selected</button> */}
+      <button onClick={addNewGuest}> Add to Guestlist</button>
     </>
   );
 }
-
-export default App;
