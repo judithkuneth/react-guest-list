@@ -51,11 +51,13 @@ export default function App2() {
           {guest.id}
           {guest.firstName}
           {guest.lastName}
-          <input
-            type="checkbox"
+          <button
+            // type="checkbox"
             value={guest.id}
             onChange={() => deleteGuest(guest)}
-          ></input>
+          >
+            x
+          </button>
         </div>
       );
     });
