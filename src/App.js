@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 export default function App2() {
-  const baseUrl = 'https://jk-guest-list2.herokuapp.com/';
+  const baseUrl = 'https://jk-guest-list2.herokuapp.com';
 
   // const [guests, setGuests] = useState([]);
 
